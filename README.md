@@ -1,7 +1,7 @@
 
 # Hocuspucus 
 
-Asmall and extensible webserver for controlling key Linux
+A small and extensible webserver for controlling key Linux
 apps remotely via a browser. This means you can adjust the audio volume,
 change playlists, etc. from any browser, including the one in your mobile
 phone or tablet.
@@ -30,9 +30,11 @@ The plugins can be  configured by editing `hocuspocus.conf`
 Code:     http://code.google.com/p/hocuspocus/
 
 
-Hocuspocus is written in Python 3 and its only hard prerequisite is 
-the tornado webserver library. Optionally it can also be controlled 
+Hocuspocus is written in Python 3 and vanilla JS.
+Its only hard prerequisite is the tornado webserver library. 
+Optionally it can also be controlled 
 via mqtt messages in which case you also need paho-mqtt library
+
 
 
 Additional dependencies are introduced by the various plugins
@@ -43,3 +45,8 @@ Invocation: `./hocuspocus.py`
 ## Screenshots
 
 ![main](/Screenshots/main.png?raw=true)
+![main](/Screenshots/quodlibet.png?raw=true)
+![main](/Screenshots/chrome.png?raw=true)
+![main](/Screenshots/vlc.png?raw=true)
+![main](/Screenshots/system.png?raw=true)
+![main](/Screenshots/webcam.png?raw=true)
