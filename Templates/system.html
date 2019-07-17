@@ -1,0 +1,70 @@
+{% extends "base_vanilla.html" %}
+
+
+{% block content %}
+
+{% for c in queries %}
+{% if c.startswith("@") %}
+<h2>{{c[1:]}}</h2>
+{% else %}
+<button type=button class="bigbutton" query="{{c}}">{{c}}</button>
+{% end %}
+{% end %}
+
+{% for c in commands %}
+{% if c.startswith("@") %}
+<h2>{{c[1:]}}</h2>
+{% else %}
+<button type=button class="bigbutton" command="{{c}}">{{c}}</button>
+{% end %}
+{% end %}
+
+
+<div class=info>
+  <pre id="status">
+    {{status}}
+  </pre>
+</div>
+
+
+<script>
+"use strict";
+
+function ShowResult(status, data) {
+    console.log("command completed [" + status + "]");
+    document.getElementById("status").innerHTML = data;
+}
+
+function ButtonClick() {
+    if (this.getAttribute("command")) {
+        let params = {
+	        command: this.getAttribute("command"),
+         };
+         GetRequest("/system_command", params, ShowResult);
+    } else {
+         let params = {
+	        query: this.getAttribute("query"),
+         };
+         GetRequest("/system_query", params, ShowResult);
+    }
+}
+
+function UpdateHandler(root) {
+    for(let b of root.getElementsByTagName("button")) {
+	  // default is submit which causes forms to get submitted
+	  b.setAttribute('type', 'button');
+	  b.addEventListener("click", ButtonClick);
+    }
+}
+
+function init() {
+  console.log("system setup");
+  UpdateHandler(document);
+}
+
+window.addEventListener('load', init);
+
+
+</script>
+
+{% end %}

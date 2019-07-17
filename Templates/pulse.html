@@ -1,0 +1,122 @@
+{% extends "base_vanilla.html" %}
+
+
+{% block content %}
+
+<h2>Sinks</h2>
+{% for s in sinks %}
+<div>{{s.no}}: {{s.description}} [{{s.active_port}}]</div>
+[{{s.state}}]
+
+Mute:
+<input class=mute type="checkbox"
+       command=sink_mute
+       {{ s.mute == "yes" and "checked=checked" or ""}}
+       device="{{s.no}}" />
+
+<span class="vol_str">{{s.volume}}</span>
+<input class=vol type=range
+       min="0" max="100"
+       command=sink_vol
+       value="{{s.volume}}"
+       device="{{s.no}}" />
+
+<!-- <span>{{s.base_volume}}</span> -->
+<!-- <input class=vol type=range -->
+<!--        min="0" max="100" -->
+<!--        command=sink_basevol -->
+<!--        value="{{s.base_volume}}" -->
+<!--        device="{{s.no}}" /> -->
+<hr>
+
+{% end %}
+
+<h2>Inputs</h2>
+{% for i in inputs %}
+<div>
+<div> {{i.no}}: {{i.description}} </div>
+[{{i.state}}]
+
+Mute:
+<input class=mute type="checkbox"
+       command=source_mute
+       {{ s.mute == "yes" and "checked=checked" or ""}}
+       device="{{i.no}}" />
+
+<span class="vol_str">{{i.volume}}</span>
+<input class=vol type=range
+       command=source_vol
+       min="0" max="100"
+       value="{{i.volume}}"
+       device="{{i.no}}" />
+
+<!-- <span>{{i.base_volume}}</span> -->
+<!-- <input class=vol type=range -->
+<!--        command=source_basevol -->
+<!--        min="0" max="100" -->
+<!--        value="{{i.base_volume}}" -->
+<!--        device="{{i.no}}" /> -->
+<hr />
+</div>
+{% end %}
+
+
+<h2>Status</h2>
+<div class=info>
+  <pre id="status">
+  {{status}}
+  </pre>
+</div>
+
+
+<script>
+"use strict";
+
+var throttle_timer = null;
+function ThrottledSendCommand(params) {
+    clearTimeout(throttle_timer);
+    throttle_timer = setTimeout(function () {
+	GetRequest("/pulse_command", params);
+    }, 250);
+}
+
+function VolumeChange(e) {
+    let params = {
+	command: this.getAttribute("command"),
+	device: this.getAttribute("device"),
+	value: this.value,
+    };
+    ThrottledSendCommand(params);
+    this.parentNode.getElementsByClassName("vol_str")[0].innerHTML = "" + this.value;
+}
+
+function MuteChange(e) {
+    let params = {
+	command: this.getAttribute("command"),
+	device: this.getAttribute("device"),
+	value: this.checked ? "yes" : "no"
+    };
+    ThrottledSendCommand(params);
+}
+
+function UpdateHandler(root) {
+    for(let b of root.getElementsByClassName("vol")) {
+	b.addEventListener("change", VolumeChange);
+    }
+
+    for(let b of root.getElementsByClassName("mute")) {
+	b.addEventListener("click", MuteChange);
+    }
+}
+
+function init() {
+    console.log("pulse setup");
+    UpdateHandler(document);
+}
+
+window.addEventListener('load', init);
+
+</script>
+
+
+{% end %}

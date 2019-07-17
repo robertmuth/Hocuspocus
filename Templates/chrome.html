@@ -1,0 +1,51 @@
+{% extends "base_vanilla.html" %}
+
+
+{% block content %}
+
+
+<b>Version:</b> {{version}}
+<div class="info">
+  <pre id=status>
+    No log entry
+  </pre>
+</div>
+
+
+<input id="arg" placeholder="enter url here" type=search size=80/>
+
+<button command="openurl" type=button class=midbutton>Open URL</button>
+
+
+<script>
+"use strict";
+
+function SetStatus(html_status, data) {
+    console.log("command completed [" + html_status + "]");
+    console.log("command completed [" + data + "]");
+    document.getElementById("status").innerHTML = data;
+}
+
+function ButtonClick() {
+    let command = this.getAttribute("command");
+    let url = document.getElementById("arg").value;
+    GetRequest("/chrome_command", {command: command, arg: url}, SetStatus); 
+}
+
+function UpdateHandler(root) {
+    for(let b of root.getElementsByTagName("button")) {
+	    b.addEventListener("click", ButtonClick);
+    }
+}
+
+function init() {
+  console.log("chrome setup");
+  UpdateHandler(document);
+}
+
+window.addEventListener('load', init);
+
+
+</script>
+
+{% end %}

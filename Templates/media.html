@@ -1,0 +1,76 @@
+{% extends "base_vanilla.html" %}
+
+
+{% block content %}
+
+
+<div id="multicol"> </div>
+
+<div class=medium>
+  Columns:
+  <select id="cols" class=medium>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+  </select>
+</div>
+
+<script>
+"use strict";
+
+function ColumnsChanged() {
+    let sel = document.getElementById("cols");
+    var n = sel.value;
+    console.log("change column" + n);
+    let multi = document.getElementById("multicol");
+    multi.style.columnCount = n;
+}
+
+function ButtonClick() {
+    let genre = this.getAttribute("genre");
+    let p = new URLSearchParams();
+    p.append("genre", genre);
+    let url =  "/genre?" + p.toString();
+    console.log(`URL: ${url}`);
+    window.location.href = url;
+}
+
+function UpdateGenres(status, json_data) {
+    console.log(json_data);
+    let lst = JSON.parse(json_data);
+    let s = [];
+    for (let genre of lst) {
+	s.push(`<button type=button class="bigbutton multicolitem" genre="${genre}">${genre}</button>`)
+    }
+    
+    let e = document.getElementById("multicol");
+    e.innerHTML = s.join("");
+    UpdateHandler(multicol);
+}
+
+function UpdateHandler(root) {
+    for(let b of root.getElementsByTagName("button")) {
+	// default is submit which causes froms to get submitted
+        b.setAttribute('type', 'button');
+	b.addEventListener("click", ButtonClick);
+    }
+}
+
+function init() {
+    console.log("media setup");
+    let select =  document.getElementById("cols");
+    select.addEventListener("change", ColumnsChanged);
+    select.addEventListener("input", ColumnsChanged);
+    UpdateHandler(document);
+    GetRequest("/media_list_genres", null, UpdateGenres);
+}
+
+
+
+window.addEventListener('load', init);
+</script>
+
+
+{% end %}

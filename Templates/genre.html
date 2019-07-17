@@ -1,0 +1,70 @@
+{% extends "base_vanilla.html" %}
+
+
+{% block content %}
+
+<div id="multicol"> </div>
+
+<div class=medium>
+  Columns:
+  <select id="cols" class=medium>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+  </select>
+</div>
+
+<script>
+"use strict";
+
+function ColumnsChanged() {
+    let sel = document.getElementById("cols");
+    let n = sel.value;
+    console.log("change column" + n);
+    let multi = document.getElementById("multicol");
+    multi.style.columnCount = n;
+}
+
+function UpdateMedia(status, json_data) {
+    console.log(json_data);
+    let lst = JSON.parse(json_data);
+    let s = [];
+    for (let m of lst) {
+	s.push(`<button type=button class="bigbutton multicolitem" item="${m[1]}">${m[0]}</button>`)
+    }
+    
+    let e = document.getElementById("multicol");
+    e.innerHTML = s.join("");
+    UpdateHandler(multicol);
+}
+
+function ButtonClick() {
+    let params = {item: this.getAttribute("item")};
+    GetRequest("/playmedia", params);
+}
+
+function UpdateHandler(root) {
+    for(let b of root.getElementsByTagName("button")) {
+	  // default is submit which causes froms to get submitted
+	  b.addEventListener("click", ButtonClick);
+    }
+}
+
+function init() {
+    const url = new URL(window.location.href);
+    const genre = url.searchParams.get("genre")
+    console.log(`genre setup: ${url}`);
+    const select =  document.getElementById("cols");
+    select.addEventListener("change", ColumnsChanged);
+    select.addEventListener("input", ColumnsChanged);
+    UpdateHandler(document);
+    GetRequest("/media_list_media", {genre: genre}, UpdateMedia);
+}
+
+window.addEventListener('load', init);
+</script>
+
+
+{% end %}

@@ -1,0 +1,64 @@
+<!-- Note this is used as the header for all plugin pages -->
+<html>
+<head>
+    <base href="/"/>
+    <link rel="stylesheet" type="text/css" href="{{css_style_file}}"/>
+
+    <meta name="viewport" content="width=device-width"/>
+
+
+
+    <title>{{service_name}}: {{plugin_name}} {{plugin_extra}}</title>
+</head>
+
+
+<body>
+
+{% block header %}
+{% for t in plugins %}
+<a href="{{t['url']}}">
+    <span class=toolbelt>{{t['name']}}</span>
+</a>
+{% end %}
+<h1><a href="about/">{{service_name}}: {{plugin_name}} {{plugin_extra}}</a></h1>
+{% end %}
+
+{% block content %}
+
+{% end %}
+
+{% block footer %}
+
+{% end %}
+
+  <script>
+"use strict";
+
+function GetRequest(base_url, params, cb) {
+    let url = base_url;
+    if (params) {
+	let p = new URLSearchParams();
+	for (let key in params) {
+	    p.append(key, params[key]);
+	}
+	url += "?" + p.toString();
+    }
+
+    console.log(`URL: ${url}`);
+
+    let xhr = new XMLHttpRequest();
+    xhr.onload = function(e) {
+        if (cb) cb(xhr.status, xhr.responseText);
+    };
+    xhr.onerror = function(e) {
+        window.alert("request failed");
+    };
+    xhr.onabort = function(e) {
+        window.alert("request aborted");
+    };
+    xhr.open("GET", url, true);
+    xhr.send();
+}
+    </script>
+</body>
+</html>

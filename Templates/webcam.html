@@ -1,0 +1,62 @@
+{% extends "base_vanilla.html" %}
+
+
+{% block content %}
+
+<h2>Cameras</h2>
+
+{% for c in cameras %}
+<div>
+<div>{{c.description}}</div>
+
+<img camera={{c.no}} src="">
+<button class=midbutton camera={{c.no}} type="button">Refresh</button>
+<hr>
+</div>
+{% end %}
+
+
+<script>
+
+
+function ForceReload(img) {
+    params = {
+	command: "get_picture",
+	camera: img.getAttribute("camera"),
+    };
+    let p = new URLSearchParams();
+    for (let key in params) {
+	p.append(key, params[key]);
+    }
+    let url = "/webcam_command?" + p.toString();
+
+    // just setting the src should force a reload
+    console.log(`Refresh ${url}`);
+    img.src =url;
+}
+
+function ButtonClick() {
+    ForceReload(this.parentNode.getElementsByTagName("img")[0]);
+}
+
+function UpdateHandler(root) {
+    for(let b of root.getElementsByTagName("button")) {
+	// default is submit which causes froms to get submitted
+	b.setAttribute('type', 'button');
+	b.addEventListener("click", ButtonClick);
+    }
+  }
+
+function init() {
+    console.log("webcam setup");
+    UpdateHandler(document);
+    for(let img of document.getElementsByTagName("img")) {
+	ForceReload(img);
+    }
+}
+
+window.addEventListener('load', init);
+</script>
+
+
+{% end %}

@@ -1,0 +1,104 @@
+{% extends "base_vanilla.html" %}
+
+{% block content %}
+
+
+<div class=info>
+  <pre id="status">
+
+  </pre>
+</div>
+
+<p>
+    <button command="play" type=button class=midbutton>play</button>
+    <button command="stop" type=button class=midbutton>stop</button>
+    <button command="pause" type=button class=midbutton>pause</button>
+    <button command="chapter" arg="0" type=button class=midbutton>movie start</button>
+</p>
+<p>
+    <button command="prev" type=button class=midbutton>prev</button>
+    <button command="next" type=button class=midbutton>next</button>
+</p>
+<p>
+    <button command="volup" arg="1" type=button class=midbutton>vol+</button>
+    <button command="voldown" arg="1" type=button class=midbutton>vol-</button>
+</p>
+<p>
+    <button command="faster" type=button class=midbutton>speed+</button>
+    <button command="slower" type=button class=midbutton>speed-</button>
+</p>
+<p>
+    <button command="seek_rel" arg
+    "-20" type=button class=midbutton>rrrev</button>
+    <button command="seek_rel" arg="-5" type=button class=midbutton>rrev</button>
+    <button command="seek_rel" arg="-1" type=button class=midbutton>rev</button>
+    <button command="seek_rel" arg="+1" type=button class=midbutton>fwd</button>
+    <button command="seek_rel" arg="+5" type=button class=midbutton>ffwd</button>
+    <button command="seek_rel" arg="+20" type=button class=midbutton>fffwd</button>
+</p>
+
+<button command="play_and_exit" type=button class=midbutton>play_medium</button>
+<input type="text" id="medium" size="100">
+<hr/>
+<button command="fullscreen" type=button class=midbutton>fullscreen</button>
+<button command="launch" type=button class=midbutton>launch</button>
+<button command="kill" type=button class=midbutton>kill</button>
+
+
+<script>
+"use strict";
+
+let elemStatus = document.getElementById("status");
+let elemMedium = document.getElementById("medium");
+
+function SendCommand(command, arg) {
+    console.log(`${command} ${arg}`);
+    let d = {command: command};
+    if (arg) {
+        d.arg = arg;
+    }
+    GetRequest("/vlc_command", d);
+}
+
+function ButtonClick() {
+    let command = this.getAttribute("command");
+    if (command == "play_and_exit" || command == "add") {
+        SendCommand(command, elemMedium.value);
+    } else {
+       SendCommand(command, this.getAttribute("arg"));
+    }
+}
+
+function SetStatus(status, data) {
+    // console.log("command completed [" + status + "]");
+    // console.log("command completed [" + data + "]");
+    elemStatus.innerHTML = data;
+
+}
+
+function UpdateStatus() {
+        GetRequest("/vlc_command", {command: "status"}, SetStatus);
+}
+
+function UpdateHandler(root) {
+    console.log("vlc setup");
+
+    for(let b of root.getElementsByTagName("button")) {
+       	b.setAttribute('type', 'button');
+	    b.addEventListener("click", ButtonClick);
+    }
+
+    UpdateStatus();
+    setInterval(UpdateStatus, 2000);
+}
+
+function init() {
+  console.log("vlc setup");
+  UpdateHandler(document);
+}
+
+window.addEventListener('load', init);
+
+</script>
+
+{% end %}
