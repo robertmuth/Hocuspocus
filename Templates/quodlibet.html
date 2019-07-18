@@ -1,0 +1,135 @@
+{% extends "base_vanilla.html" %}
+
+
+{% block content %}
+
+
+<div class=info>
+  <b>
+  <pre id="status">
+
+  </pre>
+  </b>
+</div>
+
+<p>
+<span>Position:</span>
+<input id=pos type=range min="0" max="100" value="0" />
+</p>
+
+<p>
+<span>Volume:</span>
+<input id=vol type=range min="0" max="100" value="0" />
+</p>
+
+<p>
+<button command="play" type=button class=midbutton>play</button>
+<button command="pause" type=button  class=midbutton>pause</button>
+<button command="prev" type=button  class=midbutton>prev</button>
+<button command="next" type=button  class=midbutton>next</button>
+</p>
+
+<hr/>
+<button command="kill" type=button  class=midbutton>kill</button>
+
+
+<script>
+"use strict";
+
+function EventThrottle(fn, delay) {
+  var timer = null;
+  return function () {
+    var context = this;
+    var args = arguments;
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      fn.apply(context, args);
+    }, delay);
+  };
+}
+
+function UpdateHandler(root) {
+    let inputPos = document.getElementById("pos");
+    let inputVol = document.getElementById("vol");
+
+    function SendCommand(command, value, callback) {
+        console.log(command);
+        if (callback) {
+            GetRequest("/quodlibet_command",
+                  {command: command, value: value}, callback);
+        } else {
+             GetRequest("/quodlibet_command",
+                  {command: command, value: value});
+        }
+    }
+
+    var throttle_timer = null;
+    function ThrottledSendCommand(command, value, callback) {
+        clearTimeout(throttle_timer);
+        throttle_timer = setTimeout(function () {
+                               SendCommand(command, value, callback);
+                           }, 250);
+    }
+
+    function ButtonClick() {
+         let command = this.getAttribute("command");
+         ThrottledSendCommand(command, "x", null);
+    }
+
+    function SetStatus(status, json_data) {
+        let d = JSON.parse(json_data);
+        // console.log("command completed [" + status + "]");
+        //console.log("command completed [" + data + "]");
+
+        var info = d.title + " (" +  d.artist + " - " + d.album + ")";
+        console.log("set info: " + info);
+        document.getElementById("status").innerHTML = info;
+
+        var vol = 100 * d.volume;
+        console.log("set vol: " + vol);
+        inputVol.value = vol;
+
+        var pos = 100 * d.position;
+        console.log("set pos: " + pos);
+        inputPos.value = pos;
+    }
+
+    function UpdateStatus() {
+        ThrottledSendCommand("status", "x", SetStatus);
+    }
+
+    for(let b of root.getElementsByTagName("button")) {
+        // default is submit which causes forms to get submitted
+	    b.setAttribute('type', 'button');
+	    b.addEventListener("click", ButtonClick);
+    }
+
+    UpdateStatus();
+    setInterval(UpdateStatus, 2000);
+
+    function VolumeChange(e) {
+        var value = this.value;
+        ThrottledSendCommand("change_volume", value);
+        console.log("change_volume " +  value);
+        // j.prev().text(value);
+    }
+
+    function PositionChange(e) {
+        var value = this.value;
+        ThrottledSendCommand("change_position", value, null);
+        // j.prev().text(value);
+    }
+
+    inputVol.addEventListener("change", VolumeChange);
+    inputPos.addEventListener("change", PositionChange);
+ }
+
+function init() {
+  console.log("quodlibet setup");
+  UpdateHandler(document);
+}
+
+window.addEventListener('load', init);
+ </script>
+
+{% end %}
