@@ -23,8 +23,10 @@ import logging
 import tornado
 
 import utils
+import os
 
-CHROME = "/usr/bin/google-chrome"
+CHROME = "/bin/chromium-browser"
+# CHROME = "/usr/bin/google-chrome"
 
 
 def ChromeVersion():
@@ -33,11 +35,22 @@ def ChromeVersion():
 
 
 def ChromeOpenURL(url):
-    _, content = utils.RunCommand([CHROME, "--new-window", url])
+    utils.RunCommandBackground([CHROME, "--kiosk", url])
+    return ""
+
+
+def ChromeFullscreen():
+    utils.RunCommandBackground([CHROME, "--kiosk"])
+    return ""
+
+
+def ChromeKill():
+    _, content = utils.RunCommand(["killall", os.path.basename(CHROME)])
     return content
 
-
 # noinspection PyAbstractClass
+
+
 class Handler(tornado.web.RequestHandler):
     """Display the plugin page"""
 
@@ -48,7 +61,7 @@ class Handler(tornado.web.RequestHandler):
     def get(self, dummy_p, *dummy_k):
         logging.info("chrome handler request")
         self._template_args["version"] = ChromeVersion()
-        print (self._template_args["version"])
+        print(self._template_args["version"])
         self.write(self.render_string("chrome.html", **self._template_args))
         self.finish()
 
@@ -68,7 +81,11 @@ class CommandHandler(tornado.web.RequestHandler):
         logging.info("chrome command handler request [%s, %s]", command, arg)
         status = ""
         if command == "openurl":
-            status = ChromeOpenURL(arg)
+            ChromeOpenURL(arg)
+        elif command == "kill":
+            status = ChromeKill()
+        elif command == "fullscreen":
+            status = ChromeFullscreen()
         self.write(status)
         self.finish()
 
@@ -81,6 +98,7 @@ def GetHandlers():
 
 def GetTopics():
     return [r"chrome_command/#"]
+
 
 def GetDependencies():
     return [CHROME]
